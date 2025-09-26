@@ -23,7 +23,7 @@ export class AlquilerService {
     const usuario = await this.usuarioRepo.findOneBy({ id_usuario: usuarioId });
     if (!usuario) throw new BadRequestException('Usuario no existe');
 
-    // Validar si el usuario ya tiene un alquiler activo
+    // Verifica si el usuario ya tiene un alquiler activo
     const alquilerActivo = await this.alquilerRepo.findOne({
       where: {
         fk_id_usuario: { id_usuario: usuarioId },
@@ -35,12 +35,16 @@ export class AlquilerService {
       throw new BadRequestException('El usuario ya tiene un alquiler activo');
     }
 
+    // Buscar bicicleta
     const bici = await this.biciRepo.findOneBy({ id_bicicleta: biciId });
     if (!bici) throw new BadRequestException('Bicicleta no existe');
+    
+    // Verificar disponibilidad (asegúrate de que en BD esté en true)
     if (!bici.disponible) throw new BadRequestException('Bicicleta no disponible');
 
     const tarifaBase = Number(bici.precio_alquiler);
 
+    // Marcar como no disponible
     bici.disponible = false;
     await this.biciRepo.save(bici);
 
@@ -58,6 +62,7 @@ export class AlquilerService {
   async devolver(alquilerId: number, fechaFin: string) {
     const alquiler = await this.alquilerRepo.findOne({
       where: { id_alquiler: alquilerId },
+      relations: ['fk_id_usuario', 'fk_id_bicicleta'],
     });
 
     if (!alquiler) throw new BadRequestException('Alquiler no encontrado');

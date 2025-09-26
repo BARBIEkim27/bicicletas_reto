@@ -22,6 +22,7 @@ export class BicicletaService {
 
   async findOne(id: number) {
     const b = await this.repo.findOneBy({ id_bicicleta: id });
+    console.log(b);
     if (!b) throw new NotFoundException('Bicicleta no encontrada');
     return b;
   }
